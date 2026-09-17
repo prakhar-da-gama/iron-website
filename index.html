@@ -934,7 +934,9 @@
     });
   });
 
-  // Voice assistant demo — three-scene reel
+  // Phone screen chat demo — three-scene reel. Starts once the hero heading
+  // has finished typing AND the visitor swipes / scrolls down a little on the
+  // first panel (see the start trigger at the bottom of this block).
   (function(){
     const assistant = document.getElementById('assistant');
     if(!assistant) return;
@@ -1039,12 +1041,27 @@
     assistant.addEventListener('keydown', e => {
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); reel(); }
     });
-    const demoIO = new IntersectionObserver((ents) => {
-      ents.forEach(en => {
-        if(en.isIntersecting){ setTimeout(reel, 800); demoIO.disconnect(); }
-      });
-    }, { threshold: .4 });
-    demoIO.observe(assistant);
+
+    // Start trigger: kick the reel once the hero heading has finished typing
+    // AND the visitor swipes / scrolls down a little on the first panel.
+    let started = false;
+    function start(){ if(started) return; started = true; reel(); }
+    let typed = window.__heroTypingDone === true;
+    document.addEventListener('iron:hero-typed', () => { typed = true; });
+    const hero = document.getElementById('top');
+    const onDown = () => { if(typed) start(); };
+    if(hero){
+      hero.addEventListener('wheel', e => { if(e.deltaY > 0) onDown(); }, { passive:true });
+      hero.addEventListener('scroll', () => { if(hero.scrollTop > 8) onDown(); }, { passive:true });
+      let ty = null;
+      hero.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive:true });
+      hero.addEventListener('touchmove', e => {
+        if(ty !== null && ty - e.touches[0].clientY > 10) onDown();
+      }, { passive:true });
+    }
+    // safety net: if the visitor never swipes, play it shortly after typing
+    const fallback = () => setTimeout(() => { if(typed) start(); }, 4500);
+    if(typed) fallback(); else document.addEventListener('iron:hero-typed', fallback, { once:true });
   })();
 
   // Reveal animations are driven per-panel by the reel (see update()):
@@ -1063,7 +1080,12 @@
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
       baseEl.textContent = base; gradEl.textContent = grad;
       if(caret) caret.classList.add('done');
+      heroTyped();
       return;
+    }
+    function heroTyped(){
+      window.__heroTypingDone = true;
+      document.dispatchEvent(new CustomEvent('iron:hero-typed'));
     }
     let i = 0, j = 0;
     function typeBase(){
@@ -1072,7 +1094,8 @@
     }
     function typeGrad(){
       gradEl.textContent = grad.slice(0, j);
-      if(j++ < grad.length){ setTimeout(typeGrad, 52); } else if(caret){ caret.classList.add('done'); }
+      if(j++ < grad.length){ setTimeout(typeGrad, 52); }
+      else { if(caret) caret.classList.add('done'); heroTyped(); }
     }
     setTimeout(typeBase, 450);
   })();
