@@ -1470,14 +1470,16 @@
       updateCue();
     }
 
-    // show the "read more" cue only when the current panel has content below
-    // the fold and we haven't scrolled to the bottom of it yet.
+    // slide-down cue: show while the current panel still has content below the
+    // fold, OR there's a next page to slide down to. Hidden only at the very
+    // end (the footer), where there's nowhere left to go.
     function updateCue(){
       const p = panels[current];
       if(!p || !cue) return;
       const canScrollV = p.scrollHeight > p.clientHeight + 4;
       const atBottom   = p.scrollTop + p.clientHeight >= p.scrollHeight - 24;
-      cue.classList.toggle('show', canScrollV && !atBottom);
+      const hasNext    = current < panels.length - 1;
+      cue.classList.toggle('show', (canScrollV && !atBottom) || hasNext);
     }
 
     // is the current panel scrolled to (or past) its bottom edge?
