@@ -1187,6 +1187,24 @@
            + '<div class="pcal-foot"><span class="k pick"></span>Room 101<span class="k pick2"></span>Room 103</div>'
       },
       { turns:[
+          {role:'user', plain:'“व्हाट्सएप पर रिया का मैसेज — 20 से 22 नवंबर, दो मेहमान। कोई कमरा खाली है?”'},
+          {role:'iron', plain:'कमरा 202, 20–22 नवंबर के लिए खाली है। रिया की बुकिंग जोड़ दी — पुष्टि के लिए व्हाट्सएप कर दूँ?'}
+        ],
+        cal: '<div class="pcal-head">November<span>रिया · 2 मेहमान</span></div>'
+           + '<div class="pcal-grid"><i>सो</i><i>मं</i><i>बु</i><i>गु</i><i>शु</i><i>श</i><i>र</i>'
+           + '<b>18</b><b>19</b><b class="pick">20<em>202</em></b><b class="pick">21<em>202</em></b><b class="pick2">22<em>202</em></b><b>23</b><b>24</b></div>'
+           + '<div class="pcal-foot"><span class="k pick"></span>कमरा 202<span class="k pick2"></span>चेक-आउट 22</div>'
+      },
+      { turns:[
+          {role:'user', plain:'“Llamada de Diego — del 5 al 7 de diciembre, tres personas. ¿Hay sitio?”'},
+          {role:'iron', plain:'Habitación 105 libre del 5 al 7 de diciembre. Reserva de Diego añadida — ¿le confirmo por WhatsApp?'}
+        ],
+        cal: '<div class="pcal-head">December<span>Diego · 3 huéspedes</span></div>'
+           + '<div class="pcal-grid"><i>L</i><i>M</i><i>X</i><i>J</i><i>V</i><i>S</i><i>D</i>'
+           + '<b>3</b><b>4</b><b class="pick">5<em>105</em></b><b class="pick">6<em>105</em></b><b class="pick2">7<em>105</em></b><b>8</b><b>9</b></div>'
+           + '<div class="pcal-foot"><span class="k pick"></span>Habitación 105<span class="k pick2"></span>Salida 7</div>'
+      },
+      { turns:[
           {role:'user', plain:'“So, uh, there’s a walk-in… Zeeshan, four guests — for Dev Diwali, and, um, the next night as well. Anything free?”'},
           {role:'iron', plain:'Room 103 is free for Dev Diwali. 12 Nov clashes with a 1-night booking — 40% no-show. Saved Zeeshan as unconfirmed; asked the guest to reconfirm.', html:'Room 103 is free for Dev Diwali. 12 Nov clashes with a 1-night booking — <span class="hot">40% no-show</span>. Saved Zeeshan as unconfirmed; asked the guest to reconfirm.'}
         ],
@@ -1226,6 +1244,8 @@
       await wait(700);
       hint.classList.add('hide');
       assistant.classList.add('answered');
+      pcal.innerHTML = s.cal;
+      let calShown = false;
       for(const turn of s.turns){
         if(turn.role === 'user'){
           assistant.classList.remove('speaking');
@@ -1239,15 +1259,15 @@
         const b = document.createElement('div');
         b.className = 'bubble ' + turn.role;
         chat.appendChild(b);
+        // pop the calendar the moment Iron's response starts streaming
+        if(turn.role === 'iron' && !calShown){ pcal.classList.add('show'); calShown = true; }
         await type(b, turn.plain, turn.role === 'user' ? 18 : 15);
         if(turn.html) b.innerHTML = turn.html;
         await wait(900);
       }
       assistant.classList.remove('listening', 'speaking');
-      pcal.innerHTML = s.cal;
-      await wait(450);
-      pcal.classList.add('show');
     }
+
     let running = false;
     async function reel(){
       if(running) return;
