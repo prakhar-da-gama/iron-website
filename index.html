@@ -1282,8 +1282,8 @@
         if(ty !== null && ty - e.touches[0].clientY > 10) onDown();
       }, { passive:true });
     }
-    // safety net: if the visitor never swipes, play it shortly after typing
-    const fallback = () => setTimeout(() => { if(typed) start(); }, 4500);
+    // even without a swipe, auto-start 2.5s after the heading finishes typing
+    const fallback = () => setTimeout(() => { if(typed) start(); }, 2500);
     if(typed) fallback(); else document.addEventListener('iron:hero-typed', fallback, { once:true });
   })();
 
