@@ -189,6 +189,16 @@
   .phone-screen{position:relative;background:var(--white);border-radius:34px;height:560px;overflow:hidden;display:flex;flex-direction:column}
   .pscreen-top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px 0;font-family:'Sora';font-weight:700;font-size:13px;color:var(--ink)}
   .pscreen-top .pclock{font-family:'Inter';font-weight:600;color:var(--muted)}
+  .pscreen-top .ptop-right{display:inline-flex;align-items:center;gap:9px}
+  .mute-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);
+    background:var(--cream);display:grid;place-items:center;cursor:pointer;color:var(--ink);padding:0;
+    transition:background .15s,color .15s}
+  .mute-btn svg{width:14px;height:14px}
+  .mute-btn:hover{background:var(--white)}
+  .mute-btn .ic-muted{display:none}
+  .mute-btn.muted{color:var(--muted)}
+  .mute-btn.muted .ic-sound{display:none}
+  .mute-btn.muted .ic-muted{display:block}
 
   .assistant{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;user-select:none;padding:24px;text-align:center}
   .orb{position:relative;width:130px;height:130px;display:grid;place-items:center;transition:width .45s ease,height .45s ease}
@@ -340,16 +350,17 @@
     border:2.5px solid #e5484d;box-shadow:inset 0 0 0 1px rgba(229,72,77,.5),inset 0 0 18px 2px rgba(229,72,77,.35)}
 
   /* choreography — .play is toggled by JS when the intro panel becomes active,
-     with a forced reflow so the sequence restarts cleanly on every arrival.
-     Beats: un-ball (0–1s) → hold dirty + red border flash (~1.2–6s) →
-     grey scanner sweeps ×3 while it cleans (6–9.3s) → full booked calendar. */
-  .ironcal-stage.play .ironcal{animation:ic-unball 1s cubic-bezier(.34,1.28,.5,1) both}
-  .ironcal-stage.play .ironcal-crease{animation:ic-crease 3.3s ease-in 6s both}
-  .ironcal-stage.play .ironcal-mess{animation:ic-mess 3.3s ease-in 6s both}
-  .ironcal-stage.play .ironcal-alert{animation:ic-alert .8s ease-in-out 1.2s 6 both}
-  .ironcal-stage.play .ironcal-scan{animation:ic-scan 1.1s linear 6s 3 both}
-  .ironcal-stage.play .ironcal-press{animation:ic-press 1.1s linear 6s 3 both}
-  .ironcal-stage.play .ic-chip{animation:ic-chip-in .5s cubic-bezier(.22,1,.36,1) both;animation-delay:var(--d,6.4s)}
+     with a forced reflow so the sequence restarts cleanly and then loops.
+     Beats (20% faster): un-ball (0–.8s) → hold dirty + red border flash
+     (~1–4.8s) → grey scanner sweeps ×3 while it cleans (4.8–7.4s) → full
+     booked calendar. Chip delays are scaled by the same 0.8 factor. */
+  .ironcal-stage.play .ironcal{animation:ic-unball .8s cubic-bezier(.34,1.28,.5,1) both}
+  .ironcal-stage.play .ironcal-crease{animation:ic-crease 2.64s ease-in 4.8s both}
+  .ironcal-stage.play .ironcal-mess{animation:ic-mess 2.64s ease-in 4.8s both}
+  .ironcal-stage.play .ironcal-alert{animation:ic-alert .64s ease-in-out .96s 6 both}
+  .ironcal-stage.play .ironcal-scan{animation:ic-scan .88s linear 4.8s 3 both}
+  .ironcal-stage.play .ironcal-press{animation:ic-press .88s linear 4.8s 3 both}
+  .ironcal-stage.play .ic-chip{animation:ic-chip-in .4s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--d,6.4s) * .8)}
 
   @keyframes ic-unball{
     0%{transform:scale(.3) rotate(-11deg);border-radius:52% 46% 50% 48%/48% 52% 46% 50%}
@@ -715,7 +726,7 @@
         <div class="phone-bezel">
           <div class="phone-cam"></div>
           <div class="phone-screen">
-            <div class="pscreen-top"><span>Iron</span><span class="pclock">9:41</span></div>
+            <div class="pscreen-top"><span>Iron</span><span class="ptop-right"><button class="mute-btn" id="muteBtn" type="button" aria-label="Mute voice"><svg class="ic-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 7 9H4v6h3l4 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg><svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 7 9H4v6h3l4 4z"/><path d="M22 9l-5 6M17 9l5 6"/></svg></button><span class="pclock">9:41</span></span></div>
 
             <!-- Voice assistant -->
             <div class="assistant" id="assistant" role="button" tabindex="0" aria-label="Tap to talk to Iron">
@@ -1166,6 +1177,52 @@
     const chat = document.getElementById('chat');
     const pcal = document.getElementById('pcal');
     const wait = ms => new Promise(r => setTimeout(r, ms));
+
+    // ---- real spoken voices for the chat (Web Speech API) ----
+    // Two different female voices: one reads the incoming request, the other
+    // is Iron's reply. A mute button in the phone status bar toggles them.
+    const synth = window.speechSynthesis || null;
+    let muted = false;
+    try { muted = localStorage.getItem('iron_voice_mute') === '1'; } catch(e){}
+    if(synth){ synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
+    function femaleVoices(){
+      const all = synth ? synth.getVoices() : [];
+      const en = all.filter(v => /^en(-|_|$)/i.test(v.lang));
+      const pool = en.length ? en : all;
+      const fem = /(female|zira|hazel|susan|linda|heera|catherine|samantha|victoria|karen|moira|tessa|fiona|serena|allison|ava|joanna|salli|kimberly|amy|emma|aria|jenny|michelle|libby|sonia|natasha|clara|google uk english female|google us english)/i;
+      const male = /(male|david|mark|george|guy|james|ryan|daniel|alex|fred|oliver|arthur)/i;
+      let list = pool.filter(v => fem.test(v.name));
+      if(list.length < 2) list = pool.filter(v => !male.test(v.name));
+      return list.length ? list : pool;
+    }
+    function speak(text, role){
+      if(muted || !synth) return;
+      const list = femaleVoices();
+      const u = new SpeechSynthesisUtterance(text.replace(/[“”"‘’']/g,'').replace(/—/g,', ').trim());
+      const v = role === 'user' ? list[0] : (list[1] || list[0]);
+      if(v){ u.voice = v; u.lang = v.lang; }
+      // keep the two "girls" distinct even if only one female voice exists
+      u.pitch = role === 'user' ? 1.28 : 0.92;
+      u.rate  = role === 'user' ? 1.06 : 0.96;
+      u.volume = 1;
+      try { synth.cancel(); synth.speak(u); } catch(e){}
+    }
+    const muteBtn = document.getElementById('muteBtn');
+    function updateMute(){
+      if(!muteBtn) return;
+      muteBtn.classList.toggle('muted', muted);
+      muteBtn.setAttribute('aria-label', muted ? 'Unmute voice' : 'Mute voice');
+    }
+    if(muteBtn){
+      updateMute();
+      muteBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        muted = !muted;
+        try { localStorage.setItem('iron_voice_mute', muted ? '1' : '0'); } catch(err){}
+        if(muted && synth) synth.cancel();
+        updateMute();
+      });
+    }
     function type(el, text, speed){
       return new Promise(res => {
         el.textContent = ''; el.classList.add('show'); let i = 0;
@@ -1216,6 +1273,7 @@
       }
     ];
     function clearScene(){
+      if(synth) synth.cancel();
       pcal.classList.remove('show');
       assistant.classList.remove('answered', 'listening', 'speaking');
       chat.innerHTML = '';
@@ -1238,6 +1296,7 @@
         const b = document.createElement('div');
         b.className = 'bubble ' + turn.role;
         chat.appendChild(b);
+        speak(turn.plain, turn.role);
         await type(b, turn.plain, turn.role === 'user' ? 18 : 15);
         if(turn.html) b.innerHTML = turn.html;
         await wait(900);
@@ -1492,35 +1551,40 @@
 
     // captions timed to the animation beats (dirty → scanning → clean)
     const captions = [
-      { at:400,  text:'Every booking — WhatsApp, calls, OTAs — scattered and clashing?' },
-      { at:6100, text:'Iron scans and irons out the mess…' },
-      { at:9300, text:'One clear calendar. Fully booked · occupancy +16%.',
+      { at:320,  text:'Every booking — WhatsApp, calls, OTAs — scattered and clashing?' },
+      { at:4880, text:'Iron scans and irons out the mess…' },
+      { at:7440, text:'One clear calendar. Fully booked · occupancy +16%.',
         html:'One clear calendar. Fully booked · occupancy <span class="cap-up">+16%</span>.' }
     ];
     let timers = [];
+    let loopTimer = null;
+    const CYCLE = 10800;   // ~7.6s sequence + a short hold on the clean calendar, then replay
     const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+    const clearLoop = () => { if(loopTimer){ clearTimeout(loopTimer); loopTimer = null; } };
     function typeCap(cap){
       if(!capEl) return;
       const text = cap.text; capEl.textContent = ''; let i = 0;
       (function step(){
         capEl.textContent = text.slice(0, ++i);
-        if(i < text.length) timers.push(setTimeout(step, 28));
+        if(i < text.length) timers.push(setTimeout(step, 22));
         else if(cap.html) capEl.innerHTML = cap.html;   // swap in the green flashing +16%
       })();
     }
     function play(){
-      clearTimers();
+      clearTimers(); clearLoop();
       stage.classList.remove('play');
       void stage.offsetWidth;            // force reflow so the animations restart
       stage.classList.add('play');
-      if(!capEl) return;
-      if(reduce){ const last = captions[captions.length - 1]; capEl.innerHTML = last.html || last.text; return; }
-      capEl.textContent = '';
-      captions.forEach(c => timers.push(setTimeout(() => typeCap(c), c.at)));
+      if(reduce){ if(capEl){ const last = captions[captions.length - 1]; capEl.innerHTML = last.html || last.text; } return; }
+      if(capEl){
+        capEl.textContent = '';
+        captions.forEach(c => timers.push(setTimeout(() => typeCap(c), c.at)));
+      }
+      loopTimer = setTimeout(play, CYCLE);   // keep looping while the panel is active
     }
     function stop(){
+      clearTimers(); clearLoop();
       stage.classList.remove('play');
-      clearTimers();
       if(capEl) capEl.textContent = '';
     }
     const mo = new MutationObserver(() => {
