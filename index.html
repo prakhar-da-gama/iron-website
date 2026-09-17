@@ -84,7 +84,7 @@
     background:rgba(250,247,242,.82);
     border-bottom:1px solid rgba(231,227,220,.7);
   }
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .nav-inner{display:flex;align-items:center;justify-content:flex-end;height:52px}
   .logo{display:flex;align-items:center;gap:11px;font-family:'Sora';font-weight:800;font-size:21px;letter-spacing:-.03em}
   .logo-mark{
     width:34px;height:34px;border-radius:10px;
@@ -118,6 +118,10 @@
   .hero-stack .hero-note{margin-top:0;justify-content:center}
   @media(max-width:960px){.hero-stack{gap:28px}}
   .hero h1{font-size:clamp(38px,5vw,60px);font-weight:800}
+  .tw-caret{display:inline-block;width:3px;height:.95em;margin-left:5px;border-radius:2px;
+    background:var(--ember);vertical-align:-.08em;animation:tw-blink 1s step-end infinite}
+  .tw-caret.done{animation:tw-blink 1.1s step-end infinite}
+  @keyframes tw-blink{0%,100%{opacity:1}50%{opacity:0}}
   .hero h1 .grad{
     background:linear-gradient(115deg,var(--ember),var(--gold));
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -517,9 +521,6 @@
 <!-- NAV -->
 <nav>
   <div class="wrap nav-inner">
-    <a class="logo" href="#top" aria-label="Iron — back to top">
-      <span class="logo-mark">I</span>
-    </a>
     <div class="nav-cta">
       <a class="btn btn-access" href="#cta">
         Request early access
@@ -536,7 +537,7 @@
 <header class="hero panel" id="top">
   <div class="hero-glow"></div>
   <div class="wrap hero-stack">
-    <h1>Run your homestay while you <span class="grad">drive, cook, or explore.</span></h1>
+    <h1 id="heroTitle" aria-label="Run your homestay while you drive, cook, or explore."><span class="tw-base"></span><span class="grad tw-grad"></span><span class="tw-caret" aria-hidden="true"></span></h1>
 
     <!-- Phone: voice assistant + calendar -->
     <div class="phone-stage reveal">
@@ -581,7 +582,12 @@
       <div class="float-card fc-sync">
         <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg></span>Airbnb, Booking.com + 3 more synced</div>
     </div>
+  </div>
+</header>
 
+<!-- HERO COPY -->
+<section class="hero panel" id="intro">
+  <div class="wrap hero-stack hero-copy">
     <p class="lede">Iron pulls your bookings from Airbnb, Booking.com and MakeMyTrip — plus every offline guest — into one simple calendar. Cut no-shows with advanced AI, fill empty nights through your friend network, and check any guest's reviews even when they book offline. AI voice agents and WhatsApp bots handle your guests and cleaning, so the work runs while you get on with your day.</p>
     <div class="hero-cta">
       <a class="btn btn-ember" href="#cta">Start free — one property</a>
@@ -589,7 +595,7 @@
     </div>
     <div class="hero-note"><span class="dot"></span> No credit card required · Runs entirely from your phone</div>
   </div>
-</header>
+</section>
 
 <!-- STATS -->
 <div class="stats panel">
@@ -1009,6 +1015,32 @@
     entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
   }, { threshold: .12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ---------- HERO: typewriter heading ----------
+  (function(){
+    const baseEl = document.querySelector('#heroTitle .tw-base');
+    const gradEl = document.querySelector('#heroTitle .tw-grad');
+    const caret  = document.querySelector('#heroTitle .tw-caret');
+    if(!baseEl || !gradEl) return;
+    const base = 'Run your homestay while you ';
+    const grad = 'drive, cook, or explore.';
+    // respect reduced-motion: show the full title immediately
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      baseEl.textContent = base; gradEl.textContent = grad;
+      if(caret) caret.classList.add('done');
+      return;
+    }
+    let i = 0, j = 0;
+    function typeBase(){
+      baseEl.textContent = base.slice(0, i);
+      if(i++ < base.length){ setTimeout(typeBase, 42); } else { setTimeout(typeGrad, 120); }
+    }
+    function typeGrad(){
+      gradEl.textContent = grad.slice(0, j);
+      if(j++ < grad.length){ setTimeout(typeGrad, 52); } else if(caret){ caret.classList.add('done'); }
+    }
+    setTimeout(typeBase, 450);
+  })();
 
   // ---------- REEL: horizontal navigation ----------
   (function(){
