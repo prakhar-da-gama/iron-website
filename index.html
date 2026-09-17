@@ -34,14 +34,15 @@
     --maxw:1160px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;height:100%}
   body{
     font-family:'Inter',system-ui,sans-serif;
     color:var(--ink);
     background:var(--cream);
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+    height:100%;
+    overflow:hidden;
   }
   h1,h2,h3,h4{font-family:'Sora',sans-serif;line-height:1.12;letter-spacing:-.02em;color:var(--ink)}
   a{color:inherit;text-decoration:none}
@@ -68,7 +69,7 @@
 
   /* ---------- NAV ---------- */
   nav{
-    position:sticky;top:0;z-index:60;
+    position:fixed;top:0;left:0;right:0;z-index:60;
     backdrop-filter:blur(14px);
     background:rgba(250,247,242,.82);
     border-bottom:1px solid rgba(231,227,220,.7);
@@ -365,6 +366,86 @@
 
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
   .reveal.in{opacity:1;transform:none}
+
+  /* ---------- REEL: HORIZONTAL SNAP LAYOUT ---------- */
+  .reel{
+    display:flex;
+    height:100vh;height:100dvh;
+    overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .reel::-webkit-scrollbar{display:none}
+  .panel{
+    flex:0 0 100vw;width:100vw;
+    height:100vh;height:100dvh;
+    scroll-snap-align:start;scroll-snap-stop:always;
+    overflow-y:auto;overflow-x:hidden;
+    display:flex;flex-direction:column;
+    padding:96px 0 92px;position:relative;
+    scrollbar-width:none;
+  }
+  .panel::-webkit-scrollbar{display:none}
+  /* auto-margins centre the content yet keep both ends reachable when it overflows */
+  .panel > .wrap,.panel > .stats-grid{width:100%;margin-top:auto;margin-bottom:auto}
+  /* neutralise legacy full-page vertical rhythm inside panels */
+  section.panel.blk{padding:96px 0 92px}
+  .panel.hero{padding:96px 0 40px}
+  .panel.stats{border:none}
+  .panel.stats .stats-grid{padding:0}
+  .panel footer,.panel.foot{margin-top:0;border-top:none}
+  .panel .sec-head{margin-bottom:36px}
+
+  /* swipe arrows (desktop) */
+  .reel-nav{
+    position:fixed;top:50%;transform:translateY(-50%);z-index:70;
+    width:54px;height:54px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,253,248,.9);backdrop-filter:blur(8px);
+    display:grid;place-items:center;cursor:pointer;color:var(--ink);
+    box-shadow:var(--shadow);transition:opacity .25s ease,transform .2s ease,background .2s ease;
+  }
+  .reel-nav:hover{background:#fff}
+  .reel-nav svg{width:23px;height:23px}
+  .reel-next{right:24px;animation:nudge 1.9s ease-in-out infinite}
+  .reel-next:hover{transform:translateY(-50%) scale(1.08)}
+  .reel-prev{left:24px}
+  .reel-prev:hover{transform:translateY(-50%) scale(1.08)}
+  .reel-nav.hide{opacity:0;pointer-events:none}
+  @keyframes nudge{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-50%) translateX(7px)}}
+
+  /* swipe hint (mobile) */
+  .swipe-hint{
+    position:fixed;bottom:74px;left:50%;transform:translateX(-50%);z-index:70;
+    display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted);
+    background:rgba(255,253,248,.9);backdrop-filter:blur(8px);border:1px solid var(--line);
+    padding:8px 15px;border-radius:999px;box-shadow:var(--shadow);transition:opacity .35s ease;
+  }
+  .swipe-hint svg{width:17px;height:17px;animation:nudge2 1.6s ease-in-out infinite}
+  @keyframes nudge2{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+  .swipe-hint.hide{opacity:0;pointer-events:none}
+
+  /* progress dots */
+  .reel-dots{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:70;
+    display:flex;gap:9px;padding:9px 15px;border-radius:999px;align-items:center;
+    background:rgba(255,253,248,.82);backdrop-filter:blur(8px);border:1px solid var(--line);box-shadow:var(--shadow);
+  }
+  .reel-dots button{
+    width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;
+    background:var(--line);transition:all .28s ease;
+  }
+  .reel-dots button.active{background:var(--ink);width:24px;border-radius:999px}
+
+  @media(max-width:860px){
+    .reel-nav{display:none}
+    .panel{padding:82px 0 74px}
+    section.panel.blk{padding:82px 0 74px}
+    .panel.hero{padding:82px 0 40px}
+  }
+  @media(min-width:861px){.swipe-hint{display:none}}
+  @media(max-width:520px){.reel-dots{bottom:20px}.swipe-hint{bottom:62px}}
 </style>
 </head>
 <body>
@@ -389,8 +470,11 @@
   </div>
 </nav>
 
+<!-- REEL: horizontal snap track -->
+<div class="reel" id="reel">
+
 <!-- HERO -->
-<header class="hero" id="top">
+<header class="hero panel" id="top">
   <div class="hero-glow"></div>
   <div class="wrap hero-grid">
     <div>
@@ -451,7 +535,7 @@
 </header>
 
 <!-- STATS -->
-<div class="stats">
+<div class="stats panel">
   <div class="wrap stats-grid">
     <div class="stat"><b>One</b><span>calendar for every booking</span></div>
     <div class="stat"><b>AI</b><span>that cuts your no-shows</span></div>
@@ -461,7 +545,7 @@
 </div>
 
 <!-- PROBLEM -->
-<section class="blk" id="problem">
+<section class="blk panel" id="problem">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">The problem</span>
@@ -477,7 +561,7 @@
 </section>
 
 <!-- FEATURES -->
-<section class="blk" id="features" style="padding-top:0">
+<section class="blk panel" id="features">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Everything, in one app</span>
@@ -514,7 +598,7 @@
 </section>
 
 <!-- SPOTLIGHT: REVIEW + AI -->
-<section class="blk" id="review" style="padding-top:0">
+<section class="blk panel" id="review">
   <div class="wrap">
     <div class="spot">
       <!-- Guest review -->
@@ -563,7 +647,7 @@
 </section>
 
 <!-- NETWORK -->
-<section class="blk" id="network" style="padding-top:0">
+<section class="blk panel" id="network">
   <div class="wrap net">
     <div class="reveal">
       <span class="eyebrow">Network</span>
@@ -597,7 +681,7 @@
 </section>
 
 <!-- PRICING -->
-<section class="blk" id="pricing" style="padding-top:0">
+<section class="blk panel" id="pricing">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Pricing</span>
@@ -657,7 +741,8 @@
 </section>
 
 <!-- CTA -->
-<section class="wrap" id="cta">
+<section class="panel" id="cta">
+  <div class="wrap">
   <div class="cta reveal">
     <div class="cta-inner">
       <h2>Run your entire homestay operation on Iron.</h2>
@@ -665,10 +750,11 @@
       <a class="btn btn-ember" href="https://docs.google.com/forms/d/e/1FAIpQLSe8D_fvjljPmAGi818hn7ECT2Safwx4J9ehbnGiTTIoHZ4q5Q/viewform?usp=publish-editor" target="_blank" rel="noopener">Request early access</a>
     </div>
   </div>
+  </div>
 </section>
 
 <!-- FOOTER -->
-<footer>
+<footer class="panel foot">
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
@@ -698,6 +784,21 @@
     </div>
   </div>
 </footer>
+
+</div><!-- /.reel -->
+
+<!-- REEL CONTROLS -->
+<button class="reel-nav reel-prev hide" id="reelPrev" aria-label="Previous section">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+</button>
+<button class="reel-nav reel-next" id="reelNext" aria-label="Next section">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+</button>
+<div class="swipe-hint" id="swipeHint">
+  Swipe to explore
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+</div>
+<div class="reel-dots" id="reelDots" role="tablist" aria-label="Sections"></div>
 
 <script>
   // Pricing region toggle
@@ -831,6 +932,94 @@
     entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
   }, { threshold: .12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ---------- REEL: horizontal navigation ----------
+  (function(){
+    const reel   = document.getElementById('reel');
+    const panels = [...reel.querySelectorAll('.panel')];
+    const prevBtn= document.getElementById('reelPrev');
+    const nextBtn= document.getElementById('reelNext');
+    const dotsEl = document.getElementById('reelDots');
+    const hint   = document.getElementById('swipeHint');
+    if(!reel || !panels.length) return;
+
+    const labels = panels.map(p => p.id || '');
+    let current = 0;
+
+    // build progress dots
+    panels.forEach((p, i) => {
+      const b = document.createElement('button');
+      b.setAttribute('role','tab');
+      b.setAttribute('aria-label', 'Go to section ' + (i + 1));
+      b.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(b);
+    });
+    const dots = [...dotsEl.children];
+
+    function goTo(i){
+      i = Math.max(0, Math.min(panels.length - 1, i));
+      reel.scrollTo({ left: i * reel.clientWidth, behavior: 'smooth' });
+    }
+
+    function update(){
+      const idx = Math.round(reel.scrollLeft / reel.clientWidth);
+      if(idx !== current){ current = idx; }
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      prevBtn.classList.toggle('hide', current === 0);
+      nextBtn.classList.toggle('hide', current === panels.length - 1);
+    }
+
+    // wheel: turn vertical scroll into horizontal, unless the panel itself
+    // has overflowing content that still needs to scroll vertically.
+    reel.addEventListener('wheel', e => {
+      const panel = panels[current];
+      const canScrollV = panel && panel.scrollHeight > panel.clientHeight + 2;
+      if(canScrollV) return;                 // let tall panels scroll normally
+      if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+        e.preventDefault();
+        reel.scrollLeft += e.deltaY;
+        hideHint();
+      }
+    }, { passive: false });
+
+    // keyboard
+    window.addEventListener('keydown', e => {
+      if(e.key === 'ArrowRight' || e.key === 'PageDown'){ e.preventDefault(); goTo(current + 1); hideHint(); }
+      if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ e.preventDefault(); goTo(current - 1); hideHint(); }
+      if(e.key === 'Home'){ e.preventDefault(); goTo(0); }
+      if(e.key === 'End'){  e.preventDefault(); goTo(panels.length - 1); }
+    });
+
+    prevBtn.addEventListener('click', () => { goTo(current - 1); hideHint(); });
+    nextBtn.addEventListener('click', () => { goTo(current + 1); hideHint(); });
+
+    // in-page anchor links glide sideways to their panel
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        if(!id) return;
+        const i = labels.indexOf(id);
+        if(i >= 0){ e.preventDefault(); goTo(i); hideHint(); }
+      });
+    });
+
+    let hintGone = false;
+    function hideHint(){ if(hint && !hintGone){ hint.classList.add('hide'); hintGone = true; } }
+
+    let raf = null;
+    reel.addEventListener('scroll', () => {
+      if(raf) return;
+      raf = requestAnimationFrame(() => { update(); raf = null; });
+    }, { passive: true });
+
+    window.addEventListener('resize', () => goTo(current));
+    // keep touch swipes from hiding the hint too eagerly — hide on first move
+    reel.addEventListener('touchstart', hideHint, { passive: true });
+
+    update();
+    // auto-dismiss the hint after a while
+    setTimeout(hideHint, 6000);
+  })();
 </script>
 </body>
 </html>
