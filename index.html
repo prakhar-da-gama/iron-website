@@ -189,16 +189,6 @@
   .phone-screen{position:relative;background:var(--white);border-radius:34px;height:560px;overflow:hidden;display:flex;flex-direction:column}
   .pscreen-top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px 0;font-family:'Sora';font-weight:700;font-size:13px;color:var(--ink)}
   .pscreen-top .pclock{font-family:'Inter';font-weight:600;color:var(--muted)}
-  .pscreen-top .ptop-right{display:inline-flex;align-items:center;gap:9px}
-  .mute-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);
-    background:var(--cream);display:grid;place-items:center;cursor:pointer;color:var(--ink);padding:0;
-    transition:background .15s,color .15s}
-  .mute-btn svg{width:14px;height:14px}
-  .mute-btn:hover{background:var(--white)}
-  .mute-btn .ic-muted{display:none}
-  .mute-btn.muted{color:var(--muted)}
-  .mute-btn.muted .ic-sound{display:none}
-  .mute-btn.muted .ic-muted{display:block}
 
   .assistant{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;user-select:none;padding:24px;text-align:center}
   .orb{position:relative;width:130px;height:130px;display:grid;place-items:center;transition:width .45s ease,height .45s ease}
@@ -649,6 +639,38 @@
   }
   .reel-dots button.active{background:var(--ink);width:24px;border-radius:999px}
 
+  /* reel-style action rail — Like / Comment / Share, fixed on the right */
+  .reel-actions{
+    position:fixed;right:16px;bottom:92px;z-index:72;
+    display:flex;flex-direction:column;gap:15px;align-items:center;
+  }
+  .ract{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+    background:none;border:none;cursor:pointer;padding:0;font-family:'Inter'}
+  .ract-ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--ink);
+    background:rgba(255,253,248,.9);backdrop-filter:blur(8px);border:1px solid var(--line);
+    box-shadow:var(--shadow);transition:transform .15s ease,background .2s ease,color .2s ease,border-color .2s ease}
+  .ract:hover .ract-ic{transform:translateY(-2px);background:#fff}
+  .ract-ic svg{width:22px;height:22px}
+  .ract-label{font-size:11px;font-weight:600;color:var(--ink-2);letter-spacing:.01em}
+  /* like: heart fills on click */
+  .ract .heart-fill{display:none}
+  .ract.liked .heart-out{display:none}
+  .ract.liked .heart-fill{display:block}
+  .ract.liked .ract-ic{color:#e5484d;border-color:#f3c2c4;background:#fff}
+  .ract.liked .ract-label{color:#e5484d}
+  @keyframes ract-pop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+  .ract.pop .ract-ic svg{animation:ract-pop .35s ease}
+  /* share: transient "Link copied" tooltip */
+  .ract-toast{position:absolute;right:56px;top:11px;white-space:nowrap;
+    background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;
+    opacity:0;transform:translateX(6px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
+  .ract.copied .ract-toast{opacity:1;transform:none}
+  @media(max-width:520px){
+    .reel-actions{right:12px;bottom:74px;gap:12px}
+    .ract-ic{width:42px;height:42px}
+    .ract-ic svg{width:20px;height:20px}
+  }
+
   /* vertical scroll cue — wide, quiet chevrons that drip downward; appears only when a panel overflows */
   .scroll-cue{
     position:fixed;left:50%;bottom:58px;transform:translateX(-50%);z-index:68;
@@ -726,7 +748,7 @@
         <div class="phone-bezel">
           <div class="phone-cam"></div>
           <div class="phone-screen">
-            <div class="pscreen-top"><span>Iron</span><span class="ptop-right"><button class="mute-btn" id="muteBtn" type="button" aria-label="Mute voice"><svg class="ic-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 7 9H4v6h3l4 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg><svg class="ic-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 7 9H4v6h3l4 4z"/><path d="M22 9l-5 6M17 9l5 6"/></svg></button><span class="pclock">9:41</span></span></div>
+            <div class="pscreen-top"><span>Iron</span><span class="pclock">9:41</span></div>
 
             <!-- Voice assistant -->
             <div class="assistant" id="assistant" role="button" tabindex="0" aria-label="Tap to talk to Iron">
@@ -1153,6 +1175,30 @@
 </div>
 <div class="reel-dots" id="reelDots" role="tablist" aria-label="Sections"></div>
 
+<!-- reel-style action rail: like / comment / share -->
+<div class="reel-actions" id="reelActions">
+  <button class="ract" data-act="like" type="button" aria-label="Like" aria-pressed="false">
+    <span class="ract-ic">
+      <svg class="heart-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <svg class="heart-fill" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </span>
+    <span class="ract-label">Like</span>
+  </button>
+  <button class="ract" data-act="comment" type="button" aria-label="Comment">
+    <span class="ract-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg>
+    </span>
+    <span class="ract-label">Comment</span>
+  </button>
+  <button class="ract" data-act="share" type="button" aria-label="Copy link">
+    <span class="ract-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>
+    </span>
+    <span class="ract-label">Share</span>
+    <span class="ract-toast">Link copied</span>
+  </button>
+</div>
+
 <script>
   // Pricing region toggle
   const toggle = document.getElementById('toggle');
@@ -1177,52 +1223,6 @@
     const chat = document.getElementById('chat');
     const pcal = document.getElementById('pcal');
     const wait = ms => new Promise(r => setTimeout(r, ms));
-
-    // ---- real spoken voices for the chat (Web Speech API) ----
-    // Two different female voices: one reads the incoming request, the other
-    // is Iron's reply. A mute button in the phone status bar toggles them.
-    const synth = window.speechSynthesis || null;
-    let muted = false;
-    try { muted = localStorage.getItem('iron_voice_mute') === '1'; } catch(e){}
-    if(synth){ synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
-    function femaleVoices(){
-      const all = synth ? synth.getVoices() : [];
-      const en = all.filter(v => /^en(-|_|$)/i.test(v.lang));
-      const pool = en.length ? en : all;
-      const fem = /(female|zira|hazel|susan|linda|heera|catherine|samantha|victoria|karen|moira|tessa|fiona|serena|allison|ava|joanna|salli|kimberly|amy|emma|aria|jenny|michelle|libby|sonia|natasha|clara|google uk english female|google us english)/i;
-      const male = /(male|david|mark|george|guy|james|ryan|daniel|alex|fred|oliver|arthur)/i;
-      let list = pool.filter(v => fem.test(v.name));
-      if(list.length < 2) list = pool.filter(v => !male.test(v.name));
-      return list.length ? list : pool;
-    }
-    function speak(text, role){
-      if(muted || !synth) return;
-      const list = femaleVoices();
-      const u = new SpeechSynthesisUtterance(text.replace(/[“”"‘’']/g,'').replace(/—/g,', ').trim());
-      const v = role === 'user' ? list[0] : (list[1] || list[0]);
-      if(v){ u.voice = v; u.lang = v.lang; }
-      // keep the two "girls" distinct even if only one female voice exists
-      u.pitch = role === 'user' ? 1.28 : 0.92;
-      u.rate  = role === 'user' ? 1.06 : 0.96;
-      u.volume = 1;
-      try { synth.cancel(); synth.speak(u); } catch(e){}
-    }
-    const muteBtn = document.getElementById('muteBtn');
-    function updateMute(){
-      if(!muteBtn) return;
-      muteBtn.classList.toggle('muted', muted);
-      muteBtn.setAttribute('aria-label', muted ? 'Unmute voice' : 'Mute voice');
-    }
-    if(muteBtn){
-      updateMute();
-      muteBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        muted = !muted;
-        try { localStorage.setItem('iron_voice_mute', muted ? '1' : '0'); } catch(err){}
-        if(muted && synth) synth.cancel();
-        updateMute();
-      });
-    }
     function type(el, text, speed){
       return new Promise(res => {
         el.textContent = ''; el.classList.add('show'); let i = 0;
@@ -1273,7 +1273,6 @@
       }
     ];
     function clearScene(){
-      if(synth) synth.cancel();
       pcal.classList.remove('show');
       assistant.classList.remove('answered', 'listening', 'speaking');
       chat.innerHTML = '';
@@ -1296,7 +1295,6 @@
         const b = document.createElement('div');
         b.className = 'bubble ' + turn.role;
         chat.appendChild(b);
-        speak(turn.plain, turn.role);
         await type(b, turn.plain, turn.role === 'user' ? 18 : 15);
         if(turn.html) b.innerHTML = turn.html;
         await wait(900);
@@ -1592,6 +1590,62 @@
     });
     mo.observe(intro, { attributes:true, attributeFilter:['class'] });
     if(intro.classList.contains('active')) play();
+  })();
+
+  // ---------- REEL ACTION RAIL: like / comment / share ----------
+  (function(){
+    const rail = document.getElementById('reelActions');
+    const reel = document.getElementById('reel');
+    if(!rail || !reel) return;
+    const panels = [...reel.querySelectorAll('.panel')];
+    const likeBtn = rail.querySelector('[data-act="like"]');
+    const commentBtn = rail.querySelector('[data-act="comment"]');
+    const shareBtn = rail.querySelector('[data-act="share"]');
+    // Google Form used by the "Request early access" CTA
+    const FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSe8D_fvjljPmAGi818hn7ECT2Safwx4J9ehbnGiTTIoHZ4q5Q/viewform?usp=publish-editor';
+
+    // per-page like state (placeholder — wire an API here later)
+    const liked = new Array(panels.length).fill(false);
+    let current = 0;
+    function syncLike(){
+      const on = !!liked[current];
+      likeBtn.classList.toggle('liked', on);
+      likeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    reel.addEventListener('scroll', () => {
+      const i = Math.round(reel.scrollLeft / reel.clientWidth);
+      if(i !== current){ current = i; syncLike(); }
+    }, { passive:true });
+
+    likeBtn.addEventListener('click', () => {
+      liked[current] = !liked[current];
+      syncLike();
+      if(liked[current]){
+        likeBtn.classList.remove('pop'); void likeBtn.offsetWidth; likeBtn.classList.add('pop');
+      }
+    });
+    likeBtn.addEventListener('animationend', () => likeBtn.classList.remove('pop'));
+
+    commentBtn.addEventListener('click', () => window.open(FORM, '_blank', 'noopener'));
+
+    shareBtn.addEventListener('click', async () => {
+      const id = (panels[current] && panels[current].id) || '';
+      const url = location.origin + location.pathname + (id ? '#' + id : '');
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch(e){
+        const t = document.createElement('textarea');
+        t.value = url; t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); } catch(_){}
+        t.remove();
+      }
+      shareBtn.classList.add('copied');
+      clearTimeout(shareBtn._t);
+      shareBtn._t = setTimeout(() => shareBtn.classList.remove('copied'), 1400);
+    });
+
+    syncLike();
   })();
 </script>
 </body>
