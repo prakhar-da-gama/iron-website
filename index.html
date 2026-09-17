@@ -120,6 +120,14 @@
   .hero-stack .hero-cta{justify-content:center}
   .hero-stack .hero-note{margin-top:0;justify-content:center}
   @media(max-width:960px){.hero-stack{gap:28px}}
+  /* #top only: the stack starts lower (title near centre) and lifts up to the
+     header position as the heading types, leaving the phone screen below it */
+  #top > .hero-stack{margin-top:32vh;margin-bottom:auto;
+    transition:margin-top 2s cubic-bezier(.22,1,.36,1)}
+  #top > .hero-stack.hero-lift{margin-top:-60px}
+  @media(prefers-reduced-motion:reduce){
+    #top > .hero-stack{margin-top:-60px;transition:none}
+  }
   .hero h1{font-size:clamp(38px,5vw,60px);font-weight:800}
   .tw-caret{display:inline-block;width:3px;height:.95em;margin-left:5px;border-radius:2px;
     background:var(--ember);vertical-align:-.08em;animation:tw-blink 1s step-end infinite}
@@ -1287,13 +1295,16 @@
     const baseEl = document.querySelector('#heroTitle .tw-base');
     const gradEl = document.querySelector('#heroTitle .tw-grad');
     const caret  = document.querySelector('#heroTitle .tw-caret');
+    const stack  = document.querySelector('#top > .hero-stack');
     if(!baseEl || !gradEl) return;
     const base = 'Run your homestay while you ';
     const grad = 'drive, cook, or explore.';
+    const lift = () => { if(stack) stack.classList.add('hero-lift'); };
     // respect reduced-motion: show the full title immediately
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
       baseEl.textContent = base; gradEl.textContent = grad;
       if(caret) caret.classList.add('done');
+      lift();
       heroTyped();
       return;
     }
@@ -1311,7 +1322,7 @@
       if(j++ < grad.length){ setTimeout(typeGrad, 52); }
       else { if(caret) caret.classList.add('done'); heroTyped(); }
     }
-    setTimeout(typeBase, 450);
+    setTimeout(() => { lift(); typeBase(); }, 450);
   })();
 
   // ---------- REEL: horizontal navigation ----------
