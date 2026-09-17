@@ -790,8 +790,6 @@
           </div>
         </div>
       </div>
-      <div class="float-card fc-review">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span>Guest score 4.8 · verified</div>
       <div class="float-card fc-sync">
         <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg></span>Airbnb, Booking.com + 3 more synced</div>
     </div>
@@ -942,10 +940,6 @@
     </div>
     <!-- copy (revealed on swipe down) -->
     <div class="spot-card spot-review rep-copy reveal">
-      <span class="badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/></svg>
-        Guest reputation engine
-      </span>
       <h3>Understand your guest before you confirm.</h3>
       <p>Look up any guest by phone number and Iron consolidates their review history from across platforms into a single, trusted score — including guests who book you offline.</p>
       <ul class="rlist">
@@ -1309,20 +1303,19 @@
     }
     async function playScene(s){
       clearScene();
-      await wait(700);
-      hint.classList.add('hide');
-      assistant.classList.add('answered');
+      assistant.classList.add('answered');   // start docked — no "tap to talk" idle
+      await wait(250);
       pcal.innerHTML = s.cal;
       let calShown = false;
       for(const turn of s.turns){
         if(turn.role === 'user'){
           assistant.classList.remove('speaking');
           assistant.classList.add('listening');
-          await wait(1000);
+          await wait(450);                    // person speaks — show their text promptly
         } else {
           assistant.classList.remove('listening');
           assistant.classList.add('speaking');
-          await wait(750);
+          await wait(1200);                   // pause = the agent fetching its response
         }
         const b = document.createElement('div');
         b.className = 'bubble ' + turn.role;
@@ -1331,7 +1324,7 @@
         if(turn.role === 'iron' && !calShown){ pcal.classList.add('show'); calShown = true; }
         await type(b, turn.plain, turn.role === 'user' ? 18 : 15);
         if(turn.html) b.innerHTML = turn.html;
-        await wait(900);
+        await wait(800);
       }
       assistant.classList.remove('listening', 'speaking');
     }
@@ -1340,39 +1333,24 @@
     async function reel(){
       if(running) return;
       running = true;
-      for(let i = 0; i < scenes.length; i++){
-        await playScene(scenes[i]);
-        await wait(6000);
+      while(running){                         // loop the conversations, never idle
+        for(const s of scenes){
+          await playScene(s);
+          await wait(5000);
+        }
       }
-      clearScene();
-      hint.classList.remove('hide');
-      running = false;
     }
     assistant.addEventListener('click', reel);
     assistant.addEventListener('keydown', e => {
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); reel(); }
     });
 
-    // Start trigger: kick the reel once the hero heading has finished typing
-    // AND the visitor swipes / scrolls down a little on the first panel.
-    let started = false;
-    function start(){ if(started) return; started = true; reel(); }
-    let typed = window.__heroTypingDone === true;
-    document.addEventListener('iron:hero-typed', () => { typed = true; });
-    const hero = document.getElementById('top');
-    const onDown = () => { if(typed) start(); };
-    if(hero){
-      hero.addEventListener('wheel', e => { if(e.deltaY > 0) onDown(); }, { passive:true });
-      hero.addEventListener('scroll', () => { if(hero.scrollTop > 8) onDown(); }, { passive:true });
-      let ty = null;
-      hero.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive:true });
-      hero.addEventListener('touchmove', e => {
-        if(ty !== null && ty - e.touches[0].clientY > 10) onDown();
-      }, { passive:true });
-    }
-    // even without a swipe, auto-start 2.5s after the heading finishes typing
-    const fallback = () => setTimeout(() => { if(typed) start(); }, 2500);
-    if(typed) fallback(); else document.addEventListener('iron:hero-typed', fallback, { once:true });
+    // Start straight away — no "tap to talk" idle. The phone opens directly on
+    // the first person's message (while the hero heading is still typing), and
+    // the pause before each reply stands in for the agent fetching its answer.
+    assistant.classList.add('answered');
+    if(hint) hint.classList.add('hide');
+    setTimeout(reel, 400);
   })();
 
   // Reveal animations are driven per-panel by the reel (see update()):
