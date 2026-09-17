@@ -435,6 +435,66 @@
   .spot-ai{background:linear-gradient(160deg,#1b1b1d,#0d0d0e);color:#faf5ec}
   .spot-card .badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:18px}
   .spot-card .badge svg{width:14px;height:14px}
+
+  /* ---------- GUEST REPUTATION: iPhone review-lookup demo ---------- */
+  /* page 3 stacks the phone on top and the copy below (seen on swipe down) */
+  .rep-wrap{display:flex;flex-direction:column;align-items:center;gap:26px;max-width:560px;margin:0 auto}
+  .rep-wrap .rep-copy{width:100%}
+  .rep-demo{flex:1;display:flex;flex-direction:column;gap:9px;padding:16px 14px;overflow:hidden}
+  .rep-ask,.rep-reply{max-width:238px;font-size:12.5px;line-height:1.42;padding:9px 12px;border-radius:15px;
+    opacity:0;transform:translateY(8px);transition:opacity .35s ease,transform .35s ease}
+  .rep-ask{align-self:flex-end;background:var(--ink);color:var(--white);border-bottom-right-radius:5px}
+  .rep-ask b{font-weight:700}
+  .rep-reply{align-self:flex-start;background:var(--cream-2);color:var(--ink);border-bottom-left-radius:5px}
+  .rep-ask.show,.rep-reply.show{opacity:1;transform:none}
+  .rep-card{margin-top:2px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+    padding:13px 13px 12px;opacity:0;transform:translateY(16px) scale(.98);transition:opacity .5s ease,transform .5s ease}
+  .rep-card.show{opacity:1;transform:none}
+  .rep-top{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .rep-av{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff;
+    font-weight:700;font-family:'Sora';font-size:13px;background:linear-gradient(135deg,var(--gold),var(--ember))}
+  .rep-who b{font-family:'Sora';font-weight:700;font-size:13px;display:block;color:var(--ink)}
+  .rep-who span{font-size:10.5px;color:var(--muted)}
+  .rep-overall{display:flex;align-items:center;gap:13px;padding:10px 0 11px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:11px}
+  .rep-score{font-family:'Sora';font-weight:800;font-size:33px;line-height:1;color:var(--ink)}
+  .rep-score small{font-size:14px;color:var(--muted);font-weight:600;margin-left:1px}
+  .rep-ovr{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+  .rep-cap{font-size:10px;color:var(--muted);font-weight:500}
+  /* fractional star bar: grey stars with a gold overlay clipped to --v */
+  .stars{position:relative;display:inline-block;font-size:14px;line-height:1;letter-spacing:2px;white-space:nowrap}
+  .stars::before{content:"\2605\2605\2605\2605\2605";color:#e3d9c8}
+  .stars::after{content:"\2605\2605\2605\2605\2605";color:#f5a623;position:absolute;left:0;top:0;
+    overflow:hidden;width:var(--v,0%);transition:width .7s cubic-bezier(.22,1,.36,1)}
+  /* no-show probability — yellow caution row */
+  .rep-risk{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-size:11.5px;font-weight:600;color:var(--ink-2);
+    background:#fff6e0;border:1px solid #f0cf7a;border-radius:9px;padding:7px 11px;margin-bottom:12px;
+    opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
+  .rep-risk.show{opacity:1;transform:none}
+  .rep-risk b{font-family:'Sora';font-weight:800;font-size:14px;color:#cc9a06}
+  .rep-srcs{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+  .rep-src{display:flex;align-items:center;gap:9px;opacity:0;transform:translateY(6px);
+    transition:opacity .35s ease,transform .35s ease}
+  .rep-src.show{opacity:1;transform:none}
+  .rep-src .rs-name{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:var(--ink-2);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rep-src .ext{font-weight:500;font-size:9.5px;color:var(--muted)}
+  .rep-src .stars{font-size:12px;flex:none}
+  .rep-src .rs-val{font-family:'Sora';font-weight:700;font-size:12px;color:var(--ink);width:26px;text-align:right;flex:none}
+  /* the last row is Iron's own network — set it apart from the past hosts */
+  .rep-src.iron{background:var(--cream-2);border:1px solid var(--line);border-radius:8px;padding:5px 7px;margin:1px -3px 0}
+  .rep-src.iron .rs-name{color:var(--ink);font-weight:700}
+  .rep-view{width:100%;justify-content:center;display:flex;align-items:center;border:1px solid var(--line);
+    background:var(--cream);color:var(--ink);font-family:'Inter';font-weight:600;font-size:12.5px;padding:10px;
+    border-radius:11px;cursor:pointer;opacity:0;transform:translateY(6px);
+    transition:opacity .35s ease,transform .35s ease,background .15s ease}
+  .rep-view.show{opacity:1;transform:none}
+  .rep-view:hover{background:var(--white)}
+  .rep-view.tap{background:var(--ember-soft)}
+  /* Autopilot: single centred card on its own page */
+  .autopilot-wrap{display:flex;justify-content:center}
+  .autopilot-wrap .spot-ai{max-width:620px;width:100%}
   .spot-review .badge{background:var(--teal-soft);color:var(--teal)}
   .spot-ai .badge{background:rgba(107,91,210,.25);color:#c9c0ff}
   .spot-card h3{font-size:26px;margin-bottom:12px}
@@ -544,10 +604,9 @@
   .stats .reveal{transform:translateY(20px) scale(.9)}
   .stats.active .reveal{transform:none}
 
-  /* Spotlight — the two cards fly in from opposite edges */
-  #review .spot-review{transform:translateX(-46px)}
-  #review .spot-ai{transform:translateX(46px)}
-  #review.active .spot-review,#review.active .spot-ai{transform:none}
+  /* Autopilot card lifts in on its own page */
+  #autopilot .spot-ai{transform:translateY(30px)}
+  #autopilot.active .spot-ai{transform:none}
 
   /* Network — copy slides from the left, partner list from the right */
   #network .net > .reveal:first-child{transform:translateX(-40px)}
@@ -564,7 +623,7 @@
 
   @media(prefers-reduced-motion: reduce){
     .reveal{transition:opacity .3s ease}
-    .reveal,.stats .reveal,#review .spot-review,#review .spot-ai,
+    .reveal,.stats .reveal,#autopilot .spot-ai,
     #network .net > .reveal,#pricing .plan.pop,#cta .cta{transform:none}
   }
 
@@ -861,6 +920,81 @@
   </div>
 </section>
 
+<!-- GUEST REPUTATION ENGINE (own page: phone demo on top, copy below on swipe) -->
+<section class="blk panel" id="review">
+  <div class="wrap rep-wrap">
+    <!-- iPhone: guest review lookup animation -->
+    <div class="phone-stage reveal">
+      <div class="phone">
+        <div class="phone-bezel">
+          <div class="phone-cam"></div>
+          <div class="phone-screen">
+            <div class="pscreen-top"><span>Iron</span><span class="pclock">9:41</span></div>
+            <div class="rep-demo" id="repDemo">
+              <div class="rep-ask" id="repAsk">So, um… a guest just enquired through Google Maps — uh, <b>+91 98765 43210</b>… what's, um, his review?</div>
+              <div class="rep-reply" id="repReply">Checking his record with hosts he's stayed with before…</div>
+              <div class="rep-card" id="repCard">
+                <div class="rep-top">
+                  <div class="rep-av">RK</div>
+                  <div class="rep-who"><b>+91 98765 43210</b><span>Reviewed by past hosts</span></div>
+                </div>
+                <div class="rep-overall">
+                  <div class="rep-score"><em id="repNum">0.0</em><small>/5</small></div>
+                  <div class="rep-ovr">
+                    <span class="stars" id="repStars" style="--v:0%"></span>
+                    <span class="rep-cap">Across his past stays</span>
+                  </div>
+                </div>
+                <div class="rep-risk" id="repRisk"><span>No-show probability</span><b>20%</b></div>
+                <div class="rep-srcs" id="repSrcs">
+                  <div class="rep-src iron"><span class="rs-name">Iron host network</span><span class="stars" style="--v:0%" data-v="82%"></span><span class="rs-val">4.1</span></div>
+                  <div class="rep-src"><span class="rs-name">External sources</span><span class="stars" style="--v:0%" data-v="78%"></span><span class="rs-val">3.9</span></div>
+                </div>
+                <button class="rep-view" id="repView" type="button">View 42 reviews</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- copy (revealed on swipe down) -->
+    <div class="spot-card spot-review rep-copy reveal">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/></svg>
+        Guest reputation engine
+      </span>
+      <h3>Understand your guest before you confirm.</h3>
+      <p>Look up any guest by phone number and Iron consolidates their review history from across platforms into a single, trusted score — including guests who book you offline.</p>
+      <ul class="rlist">
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>A single reputation score aggregated from every source, online and offline.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>Instant lookup, so walk-ins and referrals are no longer blind spots.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>Guests can improve their rating after a fixed cool-off window — reputations are earned back, not permanent.</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- RUNS ON AUTOPILOT (own page) -->
+<section class="blk panel" id="autopilot">
+  <div class="wrap autopilot-wrap">
+    <div class="spot-card spot-ai reveal">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>
+        Runs on autopilot
+      </span>
+      <h3>It works while you're away from the desk.</h3>
+      <p>Iron's AI handles the busywork — on a call, over WhatsApp, across your calendar — so hosting fits around your life, not the other way around.</p>
+      <ul class="rlist">
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Voice agents.</b> Make and answer guest calls automatically, in a natural voice.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>WhatsApp bots.</b> Reply to enquiries and confirmations instantly, in the guest's language.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>No-show shield.</b> AI spots risky bookings before they cost you a night.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Smart calendar.</b> Merges every OTA and offline booking, and flags clashes the moment they appear.</div></li>
+        <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Cleaning coordinator.</b> Schedules turnovers and nudges staff — no reminders from you.</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 <!-- STATS -->
 <div class="stats panel">
   <div class="wrap stats-grid">
@@ -919,55 +1053,6 @@
       <div class="feat reveal">
         <div class="ic i-ember"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg></div>
         <h3>Cleaning, coordinated</h3><p>Turnovers scheduled automatically and sent to your cleaning staff, with photo confirmation back.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SPOTLIGHT: REVIEW + AI -->
-<section class="blk panel" id="review">
-  <div class="wrap">
-    <div class="spot">
-      <!-- Guest review -->
-      <div class="spot-card spot-review reveal">
-        <span class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/></svg>
-          Guest reputation engine
-        </span>
-        <h3>Understand your guest before you confirm.</h3>
-        <p>Look up any guest by phone number and Iron consolidates their review history from across platforms into a single, trusted score — including guests who book you offline.</p>
-
-        <div class="rev-widget">
-          <div class="rev-top">
-            <div class="rev-av">RK</div>
-            <div class="rev-name">Rahul K.<span>verified guest</span></div>
-            <div class="rev-score"><b>4.8</b><small>across 5 sources</small></div>
-          </div>
-        </div>
-
-        <ul class="rlist">
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>A single reputation score aggregated from every source, online and offline.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>Instant lookup, so walk-ins and referrals are no longer blind spots.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div>Guests can improve their rating after a fixed cool-off window — reputations are earned back, not permanent.</div></li>
-        </ul>
-
-      </div>
-
-      <!-- AI -->
-      <div class="spot-card spot-ai reveal">
-        <span class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>
-          Runs on autopilot
-        </span>
-        <h3>It works while you're away from the desk.</h3>
-        <p>Iron's AI handles the busywork — on a call, over WhatsApp, across your calendar — so hosting fits around your life, not the other way around.</p>
-        <ul class="rlist">
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Voice agents.</b> Make and answer guest calls automatically, in a natural voice.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>WhatsApp bots.</b> Reply to enquiries and confirmations instantly, in the guest's language.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>No-show shield.</b> AI spots risky bookings before they cost you a night.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Smart calendar.</b> Merges every OTA and offline booking, and flags clashes the moment they appear.</div></li>
-          <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><div><b>Cleaning coordinator.</b> Schedules turnovers and nudges staff — no reminders from you.</div></li>
-        </ul>
       </div>
     </div>
   </div>
@@ -1554,6 +1639,76 @@
     });
     mo.observe(intro, { attributes:true, attributeFilter:['class'] });
     if(intro.classList.contains('active')) play();
+  })();
+
+  // ---------- GUEST REPUTATION: iPhone review-lookup animation ----------
+  (function(){
+    const panel = document.getElementById('review');
+    const demo  = document.getElementById('repDemo');
+    if(!panel || !demo) return;
+    const ask   = document.getElementById('repAsk');
+    const reply = document.getElementById('repReply');
+    const card  = document.getElementById('repCard');
+    const num   = document.getElementById('repNum');
+    const stars = document.getElementById('repStars');
+    const risk  = document.getElementById('repRisk');
+    const srcs  = [...document.querySelectorAll('#repSrcs .rep-src')];
+    const view  = document.getElementById('repView');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let timers = [], loopTimer = null, rafToken = 0;
+    const after = (ms, fn) => timers.push(setTimeout(fn, ms));
+    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+    const clearLoop = () => { if(loopTimer){ clearTimeout(loopTimer); loopTimer = null; } };
+
+    function countUp(el, to, dur){
+      const token = ++rafToken, start = performance.now();
+      (function tick(t){
+        if(token !== rafToken) return;
+        const p = Math.min(1, (t - start) / dur);
+        el.textContent = (to * p).toFixed(1);
+        if(p < 1) requestAnimationFrame(tick); else el.textContent = to.toFixed(1);
+      })(start);
+    }
+    function reset(){
+      clearTimers(); rafToken++;
+      ask.classList.remove('show'); reply.classList.remove('show'); card.classList.remove('show');
+      risk.classList.remove('show'); view.classList.remove('show');
+      num.textContent = '0.0'; stars.style.setProperty('--v','0%');
+      srcs.forEach(s => { s.classList.remove('show'); s.querySelector('.stars').style.setProperty('--v','0%'); });
+    }
+    function showFinal(){
+      ask.classList.add('show'); reply.classList.add('show'); card.classList.add('show');
+      num.textContent = '4.0'; stars.style.setProperty('--v','80%'); risk.classList.add('show');
+      srcs.forEach(s => { s.classList.add('show'); s.querySelector('.stars').style.setProperty('--v', s.querySelector('.stars').dataset.v); });
+      view.classList.add('show');
+    }
+    function playOnce(){
+      reset();
+      after(300,  () => ask.classList.add('show'));
+      after(1300, () => reply.classList.add('show'));
+      after(2300, () => card.classList.add('show'));
+      after(2550, () => { countUp(num, 4.0, 750); stars.style.setProperty('--v','80%'); });
+      after(2900, () => risk.classList.add('show'));
+      srcs.forEach((s, i) => after(3250 + i * 230, () => {
+        s.classList.add('show');
+        s.querySelector('.stars').style.setProperty('--v', s.querySelector('.stars').dataset.v);
+      }));
+      after(4350, () => view.classList.add('show'));
+    }
+    function loop(){ playOnce(); loopTimer = setTimeout(loop, 9500); }   // replay while the page is shown
+    function start(){ clearLoop(); if(reduce){ reset(); showFinal(); return; } loop(); }
+    function stop(){ clearTimers(); clearLoop(); rafToken++; reset(); }
+
+    // the "view reviews" option is clickable, but detailed reviews aren't shown
+    view.addEventListener('click', () => {
+      view.classList.add('tap');
+      setTimeout(() => view.classList.remove('tap'), 220);
+    });
+
+    const mo = new MutationObserver(() => panel.classList.contains('active') ? start() : stop());
+    mo.observe(panel, { attributes:true, attributeFilter:['class'] });
+    if(panel.classList.contains('active')) start();
   })();
 </script>
 </body>
