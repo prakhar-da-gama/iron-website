@@ -83,7 +83,10 @@
     backdrop-filter:blur(14px);
     background:rgba(250,247,242,.82);
     border-bottom:1px solid rgba(231,227,220,.7);
+    transition:opacity .3s ease, transform .3s ease;
   }
+  /* hide the header on the first panel only */
+  body.nav-hidden nav{opacity:0;transform:translateY(-100%);pointer-events:none}
   .nav-inner{display:flex;align-items:center;justify-content:flex-end;height:52px}
   .logo{display:flex;align-items:center;gap:11px;font-family:'Sora';font-weight:800;font-size:21px;letter-spacing:-.03em}
   .logo-mark{
@@ -873,10 +876,6 @@
 <button class="reel-nav reel-next" id="reelNext" aria-label="Next section">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
 </button>
-<div class="swipe-hint" id="swipeHint">
-  Swipe to explore
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
-</div>
 <div class="scroll-cue" id="scrollCue" role="button" tabindex="-1" aria-label="Scroll down for more">
   <svg class="cue-arrow" viewBox="0 0 52 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l22 8 22-8"/></svg>
   <svg class="cue-arrow" viewBox="0 0 52 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l22 8 22-8"/></svg>
@@ -1075,6 +1074,7 @@
       const idx = Math.round(reel.scrollLeft / reel.clientWidth);
       if(idx !== current){ current = idx; }
       dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      document.body.classList.toggle('nav-hidden', current === 0);
       prevBtn.classList.toggle('hide', current === 0);
       nextBtn.classList.toggle('hide', current === panels.length - 1);
       updateCue();
