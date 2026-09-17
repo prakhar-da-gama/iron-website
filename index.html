@@ -245,8 +245,8 @@
   /* A crumpled, scribbled-over calendar un-balls, an iron/scanner sweeps
      across, and it resolves into a crisp calendar with clean bookings.
      Everything keys off #intro.active so it replays on each arrival. */
-  .ironcal-stage{width:min(540px,92vw);margin:0 auto}
-  .ironcal{position:relative;border-radius:20px;
+  .ironcal-stage{width:100%;max-width:540px;margin:0 auto}
+  .ironcal{position:relative;border-radius:20px;overflow:hidden;
     filter:drop-shadow(0 26px 54px -28px rgba(20,20,20,.55));transform-origin:center}
 
   /* clean calendar (the "ironed" result, sitting underneath) */
@@ -270,6 +270,7 @@
   .ic-chip.off{background:#0d0d0e;color:#faf5ec}  /* AC service — dark */
   .ic-chip.free{background:#fff;color:var(--muted);border:1px solid var(--line)}  /* empty — white */
   .ic-chip.orange{background:#f97316;color:#fff}  /* vibrant orange */
+  .ic-chip.teal{background:#0d9488;color:#fff}    /* vibrant teal */
   /* multi-night stays render as one continuous coloured bar across the days;
      the name (on span-start) overflows across the blank continuation cells */
   .ic-chip.span-start,.ic-chip.span-mid,.ic-chip.span-end{position:relative;z-index:3}
@@ -280,8 +281,7 @@
   .ic-cell.pad u{color:#cbc2b3}
   /* green "+16%" occupancy trend beside the month */
   .ic-trend{display:inline-flex;align-items:center;gap:1px;font-family:'Inter';font-weight:800;
-    font-size:10.5px;color:#1f9d55;margin-left:5px;vertical-align:middle;
-    animation:cap-flash 1s ease-in-out infinite}
+    font-size:10.5px;color:#1f9d55;margin-left:5px;vertical-align:middle}
   .ic-trend svg{width:10px;height:10px}
   /* typed caption under the calendar animation */
   .ironcal-caption{display:inline-block;margin:16px auto 0;padding:10px 20px;max-width:560px;
@@ -326,8 +326,8 @@
     box-shadow:0 0 28px 8px rgba(150,150,152,.42)}
   .ironcal-press{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;border-radius:20px;
     background:linear-gradient(118deg, transparent 43%, rgba(214,214,216,.55) 50%, transparent 57%)}
-  .ironcal-alert{position:absolute;inset:-2px;z-index:6;pointer-events:none;opacity:0;border-radius:22px;
-    border:2.5px solid #e5484d;box-shadow:0 0 22px 3px rgba(229,72,77,.5),inset 0 0 18px 2px rgba(229,72,77,.35)}
+  .ironcal-alert{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;border-radius:20px;
+    border:2.5px solid #e5484d;box-shadow:inset 0 0 0 1px rgba(229,72,77,.5),inset 0 0 18px 2px rgba(229,72,77,.35)}
 
   /* choreography — .play is toggled by JS when the intro panel becomes active,
      with a forced reflow so the sequence restarts cleanly on every arrival.
@@ -784,9 +784,9 @@
             <div class="ic-cell"><u>19</u><span class="ic-chip book" style="--d:8.02s">Aditya Bose · 101</span></div>
             <div class="ic-cell"><u>20</u><span class="ic-chip air"  style="--d:8.11s">Farah Khan · 102</span></div>
             <div class="ic-cell"><u>21</u><span class="ic-chip free" style="--d:8.20s">Free</span></div>
-            <div class="ic-cell"><u>22</u><span class="ic-chip mmt span-start" style="--d:8.29s">Rohit Verma · 202</span></div>
-            <div class="ic-cell"><u>23</u><span class="ic-chip mmt span-mid" style="--d:8.38s">&nbsp;</span></div>
-            <div class="ic-cell"><u>24</u><span class="ic-chip mmt span-end" style="--d:8.47s">&nbsp;</span></div>
+            <div class="ic-cell"><u>22</u><span class="ic-chip teal span-start" style="--d:8.29s">Rohit Verma · 202</span></div>
+            <div class="ic-cell"><u>23</u><span class="ic-chip teal span-mid" style="--d:8.38s">&nbsp;</span></div>
+            <div class="ic-cell"><u>24</u><span class="ic-chip teal span-end" style="--d:8.47s">&nbsp;</span></div>
             <div class="ic-cell"><u>25</u><span class="ic-chip book" style="--d:8.56s">Isha Pillai · 203</span></div>
             <div class="ic-cell"><u>26</u><span class="ic-chip air"  style="--d:8.65s">Arjun Singh · 101</span></div>
             <div class="ic-cell"><u>27</u><span class="ic-chip mmt"  style="--d:8.74s">Lata Joshi · 102</span></div>
