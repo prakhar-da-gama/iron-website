@@ -587,39 +587,39 @@
   .foot-col a:hover{color:var(--ember)}
   .foot-bottom{margin-top:40px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted)}
 
-  /* ---------- PER-PANEL ENTRANCE ANIMATIONS ---------- */
-  /* Base: fade-up, hidden until its panel is the active reel slide.
-     Because it keys off .active, each animation replays on arrival. */
+  /* ---------- PER-SECTION ENTRANCE ANIMATIONS ---------- */
+  /* Base: fade-up, hidden until its section scrolls into view. `.inview` is
+     added once (and kept) so nothing flashes while free-scrolling past. */
   .reveal{opacity:0;transform:translateY(26px);
     transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1)}
-  .panel.active .reveal{opacity:1;transform:none}
+  .panel.inview .reveal{opacity:1;transform:none}
   /* Stagger sibling reveals within a section */
-  .panel.active .reveal:nth-child(2){transition-delay:.08s}
-  .panel.active .reveal:nth-child(3){transition-delay:.16s}
-  .panel.active .reveal:nth-child(4){transition-delay:.24s}
-  .panel.active .reveal:nth-child(5){transition-delay:.30s}
-  .panel.active .reveal:nth-child(6){transition-delay:.36s}
+  .panel.inview .reveal:nth-child(2){transition-delay:.08s}
+  .panel.inview .reveal:nth-child(3){transition-delay:.16s}
+  .panel.inview .reveal:nth-child(4){transition-delay:.24s}
+  .panel.inview .reveal:nth-child(5){transition-delay:.30s}
+  .panel.inview .reveal:nth-child(6){transition-delay:.36s}
 
   /* Stats — figures pop up as they land */
   .stats .reveal{transform:translateY(20px) scale(.9)}
-  .stats.active .reveal{transform:none}
+  .stats.inview .reveal{transform:none}
 
   /* Autopilot card lifts in on its own page */
   #autopilot .spot-ai{transform:translateY(30px)}
-  #autopilot.active .spot-ai{transform:none}
+  #autopilot.inview .spot-ai{transform:none}
 
   /* Network — copy slides from the left, partner list from the right */
   #network .net > .reveal:first-child{transform:translateX(-40px)}
   #network .net > .reveal:last-child{transform:translateX(40px)}
-  #network.active .net > .reveal{transform:none}
+  #network.inview .net > .reveal{transform:none}
 
   /* Pricing — the featured plan lifts a touch more than the rest */
   #pricing .plan.pop{transform:translateY(36px) scale(.955)}
-  #pricing.active .plan.pop{transform:none}
+  #pricing.inview .plan.pop{transform:none}
 
   /* CTA — the whole card gently zooms in for emphasis */
   #cta .cta{transform:scale(.95)}
-  #cta.active .cta{transform:none}
+  #cta.inview .cta{transform:none}
 
   @media(prefers-reduced-motion: reduce){
     .reveal{transition:opacity .3s ease}
@@ -627,12 +627,11 @@
     #network .net > .reveal,#pricing .plan.pop,#cta .cta{transform:none}
   }
 
-  /* ---------- REEL: VERTICAL SNAP LAYOUT ---------- */
+  /* ---------- REEL: FREE VERTICAL SCROLL ---------- */
   .reel{
     display:block;
     height:100vh;height:100dvh;
     overflow-y:auto;overflow-x:hidden;
-    scroll-snap-type:y mandatory;
     scroll-behavior:smooth;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
@@ -640,12 +639,9 @@
   .reel::-webkit-scrollbar{display:none}
   .panel{
     width:100vw;
-    height:100vh;height:100dvh;
-    scroll-snap-align:start;scroll-snap-stop:always;
-    overflow-y:auto;overflow-x:hidden;
+    min-height:100vh;min-height:100dvh;
     display:flex;flex-direction:column;
     padding:96px 0 92px;position:relative;
-    scrollbar-width:none;
   }
   .panel::-webkit-scrollbar{display:none}
   /* auto-margins centre the content yet keep both ends reachable when it overflows */
@@ -719,19 +715,7 @@
     100%{opacity:0;transform:translateY(12px)}
   }
 
-  /* page-spring: the reel squashes up from the top edge and rebounds */
-  .reel{transform-origin:top center;will-change:transform}
-  .reel.spring{animation:pageSpring .66s cubic-bezier(.33,0,.25,1)}
-  @keyframes pageSpring{
-    0%{transform:scaleY(1)}
-    22%{transform:scaleY(.952)}
-    46%{transform:scaleY(1.024)}
-    66%{transform:scaleY(.99)}
-    82%{transform:scaleY(1.006)}
-    100%{transform:scaleY(1)}
-  }
   @media(prefers-reduced-motion:reduce){
-    .reel.spring{animation:none}
     .scroll-cue .cue-arrow{animation:none;opacity:.7}
   }
 
@@ -1442,9 +1426,9 @@
     if(!reel || !panels.length) return;
 
     const labels = panels.map(p => p.id || '');
-    let current = 0;
+    let current = -1;
 
-    // build progress dots
+    // dots bar is hidden, but keep the elements for a11y / jump-to-section
     panels.forEach((p, i) => {
       const b = document.createElement('button');
       b.setAttribute('role','tab');
@@ -1456,71 +1440,54 @@
 
     function goTo(i){
       i = Math.max(0, Math.min(panels.length - 1, i));
-      reel.scrollTo({ top: i * reel.clientHeight, behavior: 'smooth' });
+      const top = panels[i].getBoundingClientRect().top - reel.getBoundingClientRect().top + reel.scrollTop;
+      reel.scrollTo({ top, behavior: 'smooth' });
     }
 
-    function update(){
-      const idx = Math.round(reel.scrollTop / reel.clientHeight);
-      if(idx !== current){ current = idx; }
-      dots.forEach((d, i) => d.classList.toggle('active', i === current));
-      panels.forEach((p, i) => p.classList.toggle('active', i === current));
-      document.body.classList.toggle('nav-hidden', current === 0);
-      prevBtn.classList.toggle('hide', current === 0);
-      nextBtn.classList.toggle('hide', current === panels.length - 1);
-      updateCue();
+    // whichever section spans the viewport centre is the "active" one
+    function setActive(i){
+      if(i < 0 || i === current) return;
+      current = i;
+      dots.forEach((d, k) => d.classList.toggle('active', k === i));
+      panels.forEach((p, k) => p.classList.toggle('active', k === i));
+      document.body.classList.toggle('nav-hidden', i === 0);
+      prevBtn.classList.toggle('hide', i === 0);
+      nextBtn.classList.toggle('hide', i === panels.length - 1);
     }
 
-    // slide-down cue: show while the current panel still has content below the
-    // fold, OR there's a next page to slide down to. Hidden only at the very
-    // end (the footer), where there's nowhere left to go.
+    // reveal each section once as it scrolls into view — and keep it revealed
+    const seen = new IntersectionObserver(ents => {
+      ents.forEach(e => { if(e.isIntersecting){ e.target.classList.add('inview'); seen.unobserve(e.target); } });
+    }, { root: reel, rootMargin: '0px 0px -18% 0px', threshold: 0 });
+    panels.forEach(p => seen.observe(p));
+
+    // the section under the viewport centre drives nav + the looping demos
+    const centre = new IntersectionObserver(ents => {
+      ents.forEach(e => { if(e.isIntersecting) setActive(panels.indexOf(e.target)); });
+    }, { root: reel, rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+    panels.forEach(p => centre.observe(p));
+
+    // slide-down cue: shown until the very bottom of the page
     function updateCue(){
-      const p = panels[current];
-      if(!p || !cue) return;
-      const canScrollV = p.scrollHeight > p.clientHeight + 4;
-      const atBottom   = p.scrollTop + p.clientHeight >= p.scrollHeight - 24;
-      const hasNext    = current < panels.length - 1;
-      cue.classList.toggle('show', (canScrollV && !atBottom) || hasNext);
+      if(!cue) return;
+      const atEnd = reel.scrollTop + reel.clientHeight >= reel.scrollHeight - 40;
+      cue.classList.toggle('show', !atEnd);
     }
-
-    // is the current panel scrolled to (or past) its bottom edge?
-    const atPanelBottom = p => p.scrollTop + p.clientHeight >= p.scrollHeight - 2;
-
-    // watch each panel's own vertical scroll to fade the cue near the bottom.
-    // (Paging itself is native vertical scroll-snap — the panel scrolls its own
-    // overflow first, then the reel snaps on to the next panel.)
-    let cueRaf = null;
-    panels.forEach(p => {
-      p.addEventListener('scroll', () => {
-        if(cueRaf) return;
-        cueRaf = requestAnimationFrame(() => { updateCue(); cueRaf = null; });
-      }, { passive: true });
-    });
-
-    // the cue is a control: reveal the next screenful, or page on at the bottom
     cue.addEventListener('click', () => {
-      const panel = panels[current];
       hideHint();
-      if(atPanelBottom(panel)){ goTo(current + 1); return; }
-      panel.scrollBy({ top: Math.round(panel.clientHeight * 0.8), behavior: 'smooth' });
+      reel.scrollBy({ top: Math.round(reel.clientHeight * 0.85), behavior: 'smooth' });
     });
 
-    // keyboard — page at a panel's edges, otherwise let it scroll within
+    // keyboard — jump to top / bottom; arrows & space scroll freely (native)
     window.addEventListener('keydown', e => {
-      const p = panels[current];
-      if(e.key === 'ArrowDown' || e.key === 'PageDown'){
-        if(p && !atPanelBottom(p)) return;
-        e.preventDefault(); goTo(current + 1); hideHint();
-      } else if(e.key === 'ArrowUp' || e.key === 'PageUp'){
-        if(p && p.scrollTop > 2) return;
-        e.preventDefault(); goTo(current - 1); hideHint();
-      } else if(e.key === 'Home'){ e.preventDefault(); goTo(0); }
-      else if(e.key === 'End'){ e.preventDefault(); goTo(panels.length - 1); }
+      if(e.key === 'Home'){ e.preventDefault(); reel.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else if(e.key === 'End'){ e.preventDefault(); reel.scrollTo({ top: reel.scrollHeight, behavior: 'smooth' }); }
     });
 
     prevBtn.addEventListener('click', () => { goTo(current - 1); hideHint(); });
     nextBtn.addEventListener('click', () => { goTo(current + 1); hideHint(); });
 
-    // in-page anchor links glide to their panel
+    // in-page anchor links glide to their section
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         const id = a.getAttribute('href').slice(1);
@@ -1536,18 +1503,14 @@
     let raf = null;
     reel.addEventListener('scroll', () => {
       if(raf) return;
-      raf = requestAnimationFrame(() => { update(); raf = null; });
+      raf = requestAnimationFrame(() => { updateCue(); raf = null; });
     }, { passive: true });
-
-    window.addEventListener('resize', () => goTo(current));
-    // keep touch swipes from hiding the hint too eagerly — hide on first move
     reel.addEventListener('touchstart', hideHint, { passive: true });
 
-    update();
-    // re-check overflow once fonts/images have settled (affects panel height)
+    setActive(0);
+    updateCue();
     window.addEventListener('load', updateCue);
     setTimeout(updateCue, 500);
-    // auto-dismiss the hint after a while
     setTimeout(hideHint, 6000);
   })();
 
