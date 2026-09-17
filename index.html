@@ -66,6 +66,16 @@
   .btn-ghost:hover{background:var(--white);border-color:#d8d2c8}
   .btn-ember{background:var(--ember);color:#fff}
   .btn-ember:hover{transform:translateY(-2px);box-shadow:0 18px 40px -16px rgba(20,20,20,.45)}
+  /* slim nav CTA — the header's only control, kept quiet and precise */
+  .btn-access{
+    padding:8px 8px 8px 18px;font-size:13.5px;font-weight:600;letter-spacing:.005em;
+    border-radius:999px;background:var(--ink);color:#fff;border:1px solid var(--ink);
+    box-shadow:0 1px 2px rgba(20,20,20,.06);gap:6px;
+  }
+  .btn-access svg{width:15px;height:15px;padding:3px;border-radius:50%;background:rgba(255,255,255,.14);
+    transition:transform .25s ease,background .25s ease;box-sizing:content-box}
+  .btn-access:hover{transform:translateY(-1px);box-shadow:0 14px 30px -14px rgba(20,20,20,.6)}
+  .btn-access:hover svg{transform:translateX(3px);background:rgba(255,255,255,.24)}
 
   /* ---------- NAV ---------- */
   nav{
@@ -446,32 +456,43 @@
   }
   .reel-dots button.active{background:var(--ink);width:24px;border-radius:999px}
 
-  /* vertical "swipe down to read more" cue — appears only when a panel overflows */
+  /* vertical scroll cue — wide, quiet chevrons that drip downward; appears only when a panel overflows */
   .scroll-cue{
-    position:fixed;left:50%;bottom:62px;transform:translateX(-50%);z-index:68;
-    display:flex;flex-direction:column;align-items:center;gap:8px;
+    position:fixed;left:50%;bottom:58px;transform:translateX(-50%);z-index:68;
+    width:52px;height:26px;
     opacity:0;transition:opacity .55s ease;pointer-events:none;
-    filter:drop-shadow(0 1px 5px rgba(255,253,248,.95));
+    filter:drop-shadow(0 1px 6px rgba(255,253,248,.95));
   }
-  .scroll-cue.show{opacity:1}
-  .scroll-cue .cue-label{
-    font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-    animation:cueLabel 2.4s ease-in-out infinite;
+  .scroll-cue.show{opacity:1;pointer-events:auto;cursor:pointer}
+  .scroll-cue:hover{opacity:1}
+  .scroll-cue .cue-arrow{
+    position:absolute;left:0;top:0;width:52px;height:16px;
+    color:var(--ink);opacity:0;
+    animation:cueDrop 2s cubic-bezier(.45,0,.25,1) infinite;
   }
-  .scroll-cue .cue-chevrons{position:relative;width:24px;height:24px}
-  .scroll-cue .cue-chevrons svg{
-    position:absolute;left:50%;top:0;width:22px;height:12px;margin-left:-11px;
-    color:var(--ink);opacity:0;animation:cueChev 2.1s cubic-bezier(.5,0,.5,1) infinite;
+  .scroll-cue .cue-arrow:nth-child(2){animation-delay:.42s}
+  @keyframes cueDrop{
+    0%{opacity:0;transform:translateY(-7px)}
+    35%{opacity:.9;transform:translateY(3px)}
+    70%{opacity:0;transform:translateY(12px)}
+    100%{opacity:0;transform:translateY(12px)}
   }
-  .scroll-cue .cue-chevrons svg:nth-child(2){animation-delay:.18s}
-  .scroll-cue .cue-chevrons svg:nth-child(3){animation-delay:.36s}
-  @keyframes cueChev{
-    0%{opacity:0;transform:translateY(-5px) scale(.9)}
-    40%{opacity:.95;transform:translateY(4px) scale(1)}
-    80%{opacity:0;transform:translateY(13px) scale(1)}
-    100%{opacity:0}
+
+  /* page-spring: the reel squashes up from the top edge and rebounds */
+  .reel{transform-origin:top center;will-change:transform}
+  .reel.spring{animation:pageSpring .66s cubic-bezier(.33,0,.25,1)}
+  @keyframes pageSpring{
+    0%{transform:scaleY(1)}
+    22%{transform:scaleY(.952)}
+    46%{transform:scaleY(1.024)}
+    66%{transform:scaleY(.99)}
+    82%{transform:scaleY(1.006)}
+    100%{transform:scaleY(1)}
   }
-  @keyframes cueLabel{0%,100%{opacity:.5}50%{opacity:1}}
+  @media(prefers-reduced-motion:reduce){
+    .reel.spring{animation:none}
+    .scroll-cue .cue-arrow{animation:none;opacity:.7}
+  }
 
   @media(max-width:860px){
     .reel-nav{display:none}
@@ -488,12 +509,14 @@
 <!-- NAV -->
 <nav>
   <div class="wrap nav-inner">
-    <a class="logo" href="#top">
+    <a class="logo" href="#top" aria-label="Iron — back to top">
       <span class="logo-mark">I</span>
-      <span>Iron<small>Property management system</small></span>
     </a>
     <div class="nav-cta">
-      <a class="btn btn-primary" href="#cta">Request early access</a>
+      <a class="btn btn-access" href="#cta">
+        Request early access
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   </div>
 </nav>
@@ -842,13 +865,9 @@
   Swipe to explore
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
 </div>
-<div class="scroll-cue" id="scrollCue" aria-hidden="true">
-  <span class="cue-label">Read more</span>
-  <span class="cue-chevrons">
-    <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 8 10-8"/></svg>
-    <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 8 10-8"/></svg>
-    <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 8 10-8"/></svg>
-  </span>
+<div class="scroll-cue" id="scrollCue" role="button" tabindex="-1" aria-label="Scroll down for more">
+  <svg class="cue-arrow" viewBox="0 0 52 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l22 8 22-8"/></svg>
+  <svg class="cue-arrow" viewBox="0 0 52 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l22 8 22-8"/></svg>
 </div>
 <div class="reel-dots" id="reelDots" role="tablist" aria-label="Sections"></div>
 
@@ -1042,18 +1061,58 @@
       }, { passive: true });
     });
 
+    // page-spring: squash the reel up from its top edge and let it rebound
+    let springing = false, springAt = 0;
+    function playSpring(){
+      const now = Date.now();
+      if(springing || now - springAt < 260) return;   // debounce repeated overscroll
+      springing = true; springAt = now;
+      reel.classList.add('spring');
+    }
+    reel.addEventListener('animationend', e => {
+      if(e.animationName === 'pageSpring'){ reel.classList.remove('spring'); springing = false; }
+    });
+
+    // is the current panel scrolled to (or past) its bottom edge?
+    const atPanelBottom = p => p.scrollTop + p.clientHeight >= p.scrollHeight - 2;
+
     // wheel: turn vertical scroll into horizontal, unless the panel itself
     // has overflowing content that still needs to scroll vertically.
     reel.addEventListener('wheel', e => {
       const panel = panels[current];
       const canScrollV = panel && panel.scrollHeight > panel.clientHeight + 2;
-      if(canScrollV) return;                 // let tall panels scroll normally
+      if(canScrollV){
+        // pushing further down at the bottom → spring, don't fall through to nav
+        if(e.deltaY > 0 && atPanelBottom(panel)){ e.preventDefault(); playSpring(); hideHint(); }
+        return;                              // otherwise let tall panels scroll normally
+      }
       if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
         e.preventDefault();
         reel.scrollLeft += e.deltaY;
         hideHint();
       }
     }, { passive: false });
+
+    // touch: spring when dragging up (scrolling down) past a panel's bottom
+    let touchY = null;
+    reel.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+    reel.addEventListener('touchmove', e => {
+      if(touchY === null) return;
+      const panel = panels[current];
+      const dy = touchY - e.touches[0].clientY;      // positive = finger up = scrolling down
+      if(dy > 26 && panel.scrollHeight > panel.clientHeight + 2 && atPanelBottom(panel)){
+        playSpring(); touchY = null;
+      }
+    }, { passive: true });
+    reel.addEventListener('touchend', () => { touchY = null; }, { passive: true });
+
+    // the cue is a control: click to reveal the next screenful, or spring at the end
+    cue.addEventListener('click', () => {
+      const panel = panels[current];
+      hideHint();
+      if(atPanelBottom(panel)){ playSpring(); return; }
+      panel.scrollBy({ top: Math.round(panel.clientHeight * 0.8), behavior: 'smooth' });
+    });
 
     // keyboard
     window.addEventListener('keydown', e => {
